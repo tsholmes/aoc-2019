@@ -4,14 +4,18 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	aoc "github.com/tsholmes/aoc-2019"
 )
 
 func main() {
+	part1Orig()
 	part1()
+	part2Orig()
 	part2()
 }
 
-func part1() {
+func part1Orig() {
 	run := func(input []int64) int64 {
 		opstr := strings.Split(INPUT, ",")
 		ops := make([]int64, len(opstr))
@@ -122,7 +126,35 @@ func part1() {
 	fmt.Println(max)
 }
 
-func part2() {
+func part1() {
+	max := int64(0)
+
+	for v1 := 1; v1 <= 5; v1++ {
+		for v2 := 1; v2 <= 5; v2++ {
+			for v3 := 1; v3 <= 5; v3++ {
+				for v4 := 1; v4 <= 5; v4++ {
+					for v5 := 1; v5 <= 5; v5++ {
+						if v1*v2*v3*v4*v5 != 1*2*3*4*5 {
+							continue
+						}
+
+						output := int64(0)
+						for _, v := range []int{v1, v2, v3, v4, v5} {
+							ic := aoc.LoadIntCode(INPUT, aoc.FixedInput(int64(v-1), output), aoc.SingleOutput(&output))
+							ic.RunToEnd()
+						}
+						if output > max {
+							max = output
+						}
+					}
+				}
+			}
+		}
+	}
+	fmt.Println(max)
+}
+
+func part2Orig() {
 	run := func(input chan int64, output chan int64) {
 		opstr := strings.Split(INPUT, ",")
 		ops := make([]int64, len(opstr))
@@ -245,7 +277,56 @@ func part2() {
 							}
 						}
 						if output > max {
-							fmt.Println(v1, v2, v3, v4, v5)
+							max = output
+						}
+					}
+				}
+			}
+		}
+	}
+	fmt.Println(max)
+}
+func part2() {
+	max := int64(0)
+
+	for v1 := 1; v1 <= 5; v1++ {
+		for v2 := 1; v2 <= 5; v2++ {
+			for v3 := 1; v3 <= 5; v3++ {
+				for v4 := 1; v4 <= 5; v4++ {
+					for v5 := 1; v5 <= 5; v5++ {
+						if v1*v2*v3*v4*v5 != 1*2*3*4*5 || v1+v2+v3+v4+v5 != 1+2+3+4+5 {
+							continue
+						}
+
+						initIn := make(chan int64, 200)
+						out := initIn
+						var in chan int64
+
+						ics := make([]aoc.IntCode, 5)
+
+						for i, v := range []int{v1, v2, v3, v4, v5} {
+							in = out
+							if i < 4 {
+								out = make(chan int64, 200)
+							} else {
+								out = initIn
+							}
+
+							in <- int64(v + 4)
+							if i == 0 {
+								in <- 0
+							}
+
+							ics[i] = aoc.LoadIntCode(INPUT, aoc.ChanInput(in), aoc.ChanOutput(out))
+						}
+
+						for i := range ics[:4] {
+							go ics[i].RunToEnd()
+						}
+
+						ics[4].RunToEnd()
+						output := <-initIn
+						if output > max {
 							max = output
 						}
 					}
