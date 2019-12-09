@@ -14,9 +14,10 @@ func LoadIntCode(src string, input func() int64, output func(int64)) IntCode {
 	}
 
 	return IntCode{
-		Mem:    ops,
-		Input:  input,
-		Output: output,
+		Mem:      ops,
+		ExtraMem: make(map[int64]int64),
+		Input:    input,
+		Output:   output,
 	}
 }
 
@@ -53,13 +54,15 @@ func ChanOutput(ch chan<- int64) func(int64) {
 }
 
 type IntCode struct {
-	Mem    []int64
-	Pos    int64
-	Input  func() int64
-	Output func(int64)
-	Done   bool
+	Mem      []int64
+	ExtraMem map[int64]int64
+	Base     int64
+	Pos      int64
+	Input    func() int64
+	Output   func(int64)
+	Done     bool
 
-	modes [2]int64
+	modes [3]int64
 	modep int
 }
 
@@ -80,16 +83,16 @@ func (i *IntCode) Step() {
 		p1 = i.nextVal()
 		p2 = i.nextVal()
 		p3 = i.nextPtr()
-		i.Mem[p3] = p1 + p2
+		i.writeMem(p3, p1+p2)
 	case 2:
 		p1 = i.nextVal()
 		p2 = i.nextVal()
 		p3 = i.nextPtr()
-		i.Mem[p3] = p1 * p2
+		i.writeMem(p3, p1*p2)
 	case 3:
 		p1 = i.nextPtr()
 		p2 = i.Input()
-		i.Mem[p1] = p2
+		i.writeMem(p1, p2)
 	case 4:
 		p1 = i.nextVal()
 		i.Output(p1)
@@ -110,19 +113,22 @@ func (i *IntCode) Step() {
 		p2 = i.nextVal()
 		p3 = i.nextPtr()
 		if p1 < p2 {
-			i.Mem[p3] = 1
+			i.writeMem(p3, 1)
 		} else {
-			i.Mem[p3] = 0
+			i.writeMem(p3, 0)
 		}
 	case 8:
 		p1 = i.nextVal()
 		p2 = i.nextVal()
 		p3 = i.nextPtr()
 		if p1 == p2 {
-			i.Mem[p3] = 1
+			i.writeMem(p3, 1)
 		} else {
-			i.Mem[p3] = 2
+			i.writeMem(p3, 0)
 		}
+	case 9:
+		p1 = i.nextVal()
+		i.Base += p1
 	case 99:
 		i.Done = true
 	default:
@@ -131,7 +137,7 @@ func (i *IntCode) Step() {
 }
 
 func (i *IntCode) next() int64 {
-	v := i.Mem[i.Pos]
+	v := i.readMem(i.Pos)
 	i.Pos++
 	return v
 }
@@ -141,6 +147,7 @@ func (i *IntCode) nextOp() int64 {
 	op := fullOp % 100
 	i.modes[0] = (fullOp / 100) % 10
 	i.modes[1] = (fullOp / 1000) % 10
+	i.modes[2] = (fullOp / 10000) % 10
 	i.modep = 0
 	return op
 }
@@ -152,15 +159,38 @@ func (i *IntCode) nextVal() int64 {
 
 	switch mode {
 	case 0:
-		return i.Mem[v]
+		return i.readMem(v)
 	case 1:
 		return v
+	case 2:
+		return i.readMem(i.Base + v)
 	default:
 		panic(mode)
 	}
 }
 
 func (i *IntCode) nextPtr() int64 {
+	mode := i.modes[i.modep]
 	i.modep++
-	return i.next()
+
+	v := i.next()
+	if mode == 2 {
+		v += i.Base
+	}
+	return v
+}
+
+func (i *IntCode) readMem(v int64) int64 {
+	if v >= int64(len(i.Mem)) {
+		return i.ExtraMem[v]
+	}
+	return i.Mem[v]
+}
+
+func (i *IntCode) writeMem(p int64, v int64) {
+	if p >= int64(len(i.Mem)) {
+		i.ExtraMem[p] = v
+	} else {
+		i.Mem[p] = v
+	}
 }
