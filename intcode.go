@@ -8,16 +8,15 @@ import (
 
 func LoadIntCode(src string, input func() int64, output func(int64)) IntCode {
 	opstr := strings.Split(src, ",")
-	ops := make([]int64, len(opstr))
+	mem := make(map[int64]int64, len(opstr))
 	for i, s := range opstr {
-		ops[i], _ = strconv.ParseInt(s, 10, 64)
+		mem[int64(i)], _ = strconv.ParseInt(s, 10, 64)
 	}
 
 	return IntCode{
-		Mem:      ops,
-		ExtraMem: make(map[int64]int64),
-		Input:    input,
-		Output:   output,
+		Mem:    mem,
+		Input:  input,
+		Output: output,
 	}
 }
 
@@ -54,13 +53,12 @@ func ChanOutput(ch chan<- int64) func(int64) {
 }
 
 type IntCode struct {
-	Mem      []int64
-	ExtraMem map[int64]int64
-	Base     int64
-	Pos      int64
-	Input    func() int64
-	Output   func(int64)
-	Done     bool
+	Mem    map[int64]int64
+	Base   int64
+	Pos    int64
+	Input  func() int64
+	Output func(int64)
+	Done   bool
 
 	modes [3]int64
 	modep int
@@ -181,16 +179,9 @@ func (i *IntCode) nextPtr() int64 {
 }
 
 func (i *IntCode) readMem(v int64) int64 {
-	if v >= int64(len(i.Mem)) {
-		return i.ExtraMem[v]
-	}
 	return i.Mem[v]
 }
 
 func (i *IntCode) writeMem(p int64, v int64) {
-	if p >= int64(len(i.Mem)) {
-		i.ExtraMem[p] = v
-	} else {
-		i.Mem[p] = v
-	}
+	i.Mem[p] = v
 }
