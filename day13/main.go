@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"os"
+	"time"
 
 	aoc "github.com/tsholmes/aoc-2019"
 )
@@ -56,12 +59,13 @@ func part2() {
 				maxY = k[1]
 			}
 		}
-		fmt.Println("Score", score)
+		buf := bytes.NewBuffer(nil)
+		fmt.Fprintln(buf, "Score", score)
 		var padX, ballX int64
 		for y := minY; y <= maxY; y++ {
 			for x := minX; x <= maxX; x++ {
 				b := board[[2]int64{x, y}]
-				fmt.Print(string([]byte{cs[b]}))
+				fmt.Fprint(buf, string([]byte{cs[b]}))
 				if b == 3 {
 					padX = x
 				}
@@ -69,8 +73,11 @@ func part2() {
 					ballX = x
 				}
 			}
-			fmt.Println()
+			fmt.Fprintln(buf)
 		}
+		print("\033[H\033[2J")
+		os.Stdout.Write(buf.Bytes())
+		<-time.After(3 * time.Millisecond)
 		if ballX < padX {
 			return -1
 		} else if ballX > padX {
