@@ -13,3 +13,5 @@ My solution could get a LOT faster with a few improvements. First, the maze can 
 ##### `00:40:29 #5`
 
 Part 2 was just a slight modification of part 1 where you had 4 independent robots in 4 separate mazes that weren't connected to each other. You could only move one robot at the time, so the solution was almost exactly the same as part 1, you just need to keep track of 4 current locations instead of 1. I sped this part up by precomputing which keys were in each robot's maze, so when I was checking the shortest path to a specific key, I only needed to pathfind to it from one position (instead of 4). Since the search space on this problem was much smaller, it ends up running an order of magnitude faster than part 1.
+
+This problem would become a bit more difficult and interesting (but still tractable) if the robots were allowed to move simultaneously. This would force you to keep track of how many steps it took to reach each key, and ensuring you don't cross that door until the key is gathered.

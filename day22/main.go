@@ -97,7 +97,7 @@ func part2() {
 	// a^n
 	an := big.NewInt(0).Exp(muls[0], big.NewInt(int64(repCount)), mod)
 
-	// san = sum(a^n for n in [0, repCount-1]) = a(a^repCount - 1) / (a - 1)
+	// san = sum(a^n for n in [0, repCount-1]) = (a^repCount - 1) / (a - 1)
 	san := big.NewInt(0).Add(an, big.NewInt(-1))
 	denom := big.NewInt(0).Add(muls[0], big.NewInt(-1))
 	denom = denom.ModInverse(denom, mod)
