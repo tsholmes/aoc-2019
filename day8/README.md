@@ -1,4 +1,4 @@
-# Day 8: Space Image Format
+# [Day 8: Space Image Format](https://adventofcode.com/2019/day/8)
 
 ## Part 1
 

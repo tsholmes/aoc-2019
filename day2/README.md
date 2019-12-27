@@ -1,4 +1,4 @@
-# Day 2: 1202 Program Alarm (IntCode: Genesis)
+# [Day 2: 1202 Program Alarm (IntCode: Genesis)](https://adventofcode.com/2019/day/2)
 
 Missed my alarm and started late on this one :(
 

@@ -1,4 +1,4 @@
-# Day 23: Category Six
+# [Day 23: Category Six](https://adventofcode.com/2019/day/23)
 
 ## Part 1
 

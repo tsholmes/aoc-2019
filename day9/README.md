@@ -1,4 +1,4 @@
-# Day 9: Sensor Boost (IntCode Part 3: The Last One)
+# [Day 9: Sensor Boost (IntCode Part 3: The Last One)](https://adventofcode.com/2019/day/9)
 
 ## Part 1
 

@@ -1,4 +1,4 @@
-# Day 7: Amplification Circuit
+# [Day 7: Amplification Circuit](https://adventofcode.com/2019/day/7)
 
 After this problem, I decided to refactor out the IntCode machine and move it top-level to `intcode.go`. My original solution for this problem is still here as `part1Orig` and `part2Orig` (with `part1` and `part2` the newer implementation using the factored out IntCode machine).
 
